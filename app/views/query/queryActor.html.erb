@@ -1,0 +1,35 @@
+<h1>Query Actor</h1>
+<p>Find me in app/views/query/queryActor.html.erb</p>
+<%= "Search " + @actorname %>
+<br />
+<% @actor.each { %>
+<% |item| %>
+<h4 itemprop="name" class>
+	<%=	"Name: " + item.name %>
+	<br />
+</h4>
+<p>
+	<%= item.inspect %>
+	<br />
+	<%=	"Birthday: " + item.birthday.to_s %>
+	<br />
+	<%= "Gender" + item.gender %>
+	<br />
+	<%= "Place of birth: " + item.place_of_birth %>
+	<br />
+	<%= "Biography: " + item.biography %>
+	<br />
+	<%= "Known For: #{item.known_for}" %>
+	<br />
+	<%= "Known Credits: #{item.known_credits}" %>
+	<br />
+	<%= "Adult Actor: #{item.adult_actor}" %>
+	<br />
+	<%= "Alias: #{item.alias}" %>
+	<br />
+	<%= "Years of Active: #{item.years_active}" %>
+	<br />
+	<%= "data source: #{item.db_name}" %>
+</p>
+<br />
+<%	} %>

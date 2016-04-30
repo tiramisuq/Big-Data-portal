@@ -1,0 +1,43 @@
+<h1>Query Original Actor</h1>
+<p>Find me in app/views/query/originalActor.html.erb</p>
+<h4>
+<%= "Search " + @name + " in " + @source %>
+</h4>
+<br />
+<p>
+	<% if (@source == 'all') %>
+	<%	if (!@imdb.nil?) %>
+	<h5>
+	<%		"In IMDB" %>
+	<%		@imdb.each { %>
+	<%		|item| %>
+	<%=		item.inspect %>
+	<% } %>
+	<% end %>
+	</h5>
+	<%	if (!@tmdb.nil?) %>
+	<h5>
+	<%		"In TMDB" %>
+	<%		@tmdb.each { %>
+	<%		|item| %>
+	<%=		item.inspect %>
+	<% } %>
+	<% end %>
+	</h5>
+	<%	if (!@wiki.nil?) %>
+	<h5>
+	<%		"In WIKI" %>
+	<%		@wiki.each { %>
+	<%		|item| %>
+	<%=		item.inspect %>
+	<% } %>
+	<% end %>
+	</h5>
+	<% end %>
+	<% if (!@actor.nil?) %>
+<% @actor.each { %>
+<% |item| %>
+<%= item.inspect %>
+<% } %>
+<% end %>
+</p>

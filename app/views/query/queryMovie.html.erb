@@ -1,0 +1,36 @@
+<h1>Query Movie</h1>
+<p>Find me in app/views/query/queryMovie.html.erb</p>
+<%= "Search " + @moviename %>
+<br />
+<% @movie.each { %>
+<% |item| %>
+<h4 itemprop="name" class>
+	<%=	"Title: " + item.title %>
+	<br />
+</h4>
+<p>
+	<%= item.inspect %>
+	<br />
+	<%=	"Rating: #{item.rating}" %>
+	<br />
+	<%= "Release Year: #{item.year}" %>
+	<br />
+	<%= "Directors: #{item.directors}"%>
+	<br />
+	<%= "Writers: #{item.writers}"%>
+	<br />
+	<%= "Cast List:(Actor:Role)"%>
+	<%= "#{item.casts}"%>
+	<br />
+	<%= "Total Time: #{item.total_time}"%>
+	<br />
+	<%= "Language: #{item.writers}"%>
+	<br />
+	<%= "Country: #{item.country}"%>
+	<br />
+	<%= "Genre: #{item.genre}"%>
+	<br />
+	<%= "source: #{item.db_name}" %>
+</p>
+<br />
+<%	} %>

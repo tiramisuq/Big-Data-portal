@@ -1,0 +1,15 @@
+<h1>Popular Movies</h1>
+<p>Find me in app/views/query/popularfind.html.erb</p>
+
+<br  />
+<h5>
+	<%= "Find Popular Movies" %>
+	<br />
+	<% @movies.each { %>
+	<%  |item| %>
+	<%= item.inspect %>
+	<br />
+	<br />
+	<% } %>
+
+</h5>
