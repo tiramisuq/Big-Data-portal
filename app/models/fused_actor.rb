@@ -8,7 +8,7 @@ require_relative './algorithms/monge_elkan'
 
 class FusedActor
   include Mongoid::Document
-  store_in database: "fused_movie_actor"
+  store_in database: 'fused_movie_actor'
   field :name, type: String
   field :birthday, type: Date
   field :gender, type: String
@@ -20,8 +20,10 @@ class FusedActor
   field :alias, type: Array
   field :biography, type: String
   field :known_for, type: Array
+  field :acting, type: Array
   field :match_id, type: Integer
   field :db_name, type: String
+
 
   index match_id: 1
   index name: 1
@@ -38,6 +40,98 @@ class FusedActor
     @@current_match_id = mid
   end
 
+  def self.parse_tmdb_actor (actor)
+    if actor.class != TmdbActor
+      return nil
+    else
+      fused_actor = FusedActor.new
+      fused_actor.name = actor.name
+      fused_actor.birthday = actor.birthday
+      fused_actor.gender = actor.gender
+      fused_actor.place_of_birth = actor.place_of_birth
+      fused_actor.known_credits = actor.known_credits
+      fused_actor.adult_actor = actor.adult_actor
+      fused_actor.alias = actor.alias
+      fused_actor.biography = actor.biography
+      fused_actor.known_for = actor.known_for
+      acting_array = []
+      actor.acting.each_pair do |key, value|
+        entry = {movie: key, cast: value}
+        acting_array << entry
+      end
+      fused_actor.acting = acting_array
+      fused_actor.db_name = 'tmdb'
+      return fused_actor
+    end
+  end
+
+  def self.parse_wiki_actor actor
+    if actor.class != WikiActor
+      return nil
+    else
+      fused_actor = FusedActor.new
+      fused_actor.name = actor.name.strip
+      fused_actor.birthday = actor.birthday
+      fused_actor.gender = actor.gender
+      fused_actor.place_of_birth = actor.place_of_birth
+      fused_actor.alias = actor.alias
+      fused_actor.known_for = actor.known_for
+      fused_actor.nationality = actor.nationality
+      fused_actor.years_active = actor.years_active
+      fused_actor.db_name = 'wiki'
+      return fused_actor
+    end
+  end
+
+  # load from tmdb collection by Array of _id
+  # ids: Array of _id (String).
+  def self.read_tmdb_by_ids
+
+    tmdb_actors = TmdbActor.count
+    puts tmdb_actors
+  end
+
+  # load from tmdb collection of all items
+  def self.read_tmdb
+    tmdb_actors = TmdbActor.count
+    puts tmdb_actors
+  end
+
+  # load from imdb collection by a single _id
+  # meanwhile, do data cleaning to remove non-movie with high propobility
+  # and change some invalid hash key to be valid.
+  # realize using mongo Ruby Driver 2.2
+  def self.read_imdb_by_id id
+    doc = @@client[:actor].find(:_id => BSON::ObjectId(id)).first
+    fused_actor = FusedActor.new
+    fused_actor.name = doc[:name]
+    fused_actor.birthday = doc[:birthday]
+    fused_actor.gender = doc[:gender]
+    fused_actor.place_of_birth = doc[:place_of_birth]
+    fused_actor.biography = doc[:description]
+    fused_actor.nationality = doc[:nationality]
+    known_for = doc[:known_for]
+    unless known_for.nil?
+      known_for.map! { |movie| movie.sub(/\(\d\d\d\d\)/, '').strip } # remove the (year) in movie name
+    end
+    fused_actor.known_for = known_for
+    fused_actor.db_name = 'imdb'
+    return fused_actor
+  end
+
+  # load from imdb collection by Array of _id
+  # ids: Array of _id (String).
+  def self.read_imdb_by_ids ids
+    fused_actors = []
+    ids.each do |id|
+      fused_actors << (read_imdb_by_id id)
+    end
+    return fused_actors
+  end
+
+  # load from imdb collection of all items
+  def self.read_imdb
+  end
 
   def similarity other
     # initialize the weight of each field, the sum is 1
@@ -55,7 +149,17 @@ class FusedActor
     end
     # similarity of birthday
     if !self.birthday.nil? && !other.birthday.nil?
-      birthday_sim = (self.birthday == other.birthday ? 1.0 : 0)
+      if self.birthday == other.birthday
+        birthday_sim = 1.0
+      elsif self.birthday.month == other.birthday.month && self.birthday.day == other.birthday.day
+        birthday_sim = 0.9
+      elsif (self.birthday - other.birthday).to_i < 32
+        birthday_sim = 0.8
+      elsif (self.birthday - other.birthday).to_i < 366 && self.birthday.day == other.birthday.day
+        birthday_sim = 0.6
+      else
+        birthday_sim = 20.0 / (self.birthday - other.birthday).to_i.abs
+      end
     else
       b_w = b_w / 10 # lower the weight of birthday
       birthday_sim = 0
@@ -69,14 +173,23 @@ class FusedActor
     end
     # similarity of place_of_birth
     if !self.place_of_birth.nil? && !other.place_of_birth.nil?
-      place_of_birth_sim = JaccardNGrams.trigrams_sim(self.place_of_birth, other.place_of_birth)
+      place_of_birth_sim = JaccardNGrams.bigrams_sim(self.place_of_birth, other.place_of_birth)
     else
       pob_w = pob_w / 10 # lower the weight of birthday
       place_of_birth_sim = 0
     end
-    # similarity of known_for
+    # similarity of known_for. If at least two of the known_for is match, then similarity = 1
     if !self.known_for.nil? && !other.known_for.nil?
-      known_for_sim = JaccardArray.sim(self.known_for, other.known_for)
+      intersect_num = JaccardArray.intersect(self.known_for, other.known_for)
+      if intersect_num == 1
+        known_for_sim = 0.9
+      elsif intersect_num == 2
+        known_for_sim = 0.98
+      elsif intersect_num > 2
+        known_for_sim = 1.0
+      else
+        known_for_sim = 0
+      end
     else
       kf_w = kf_w / 10 # lower the weight of birthday
       known_for_sim = 0
@@ -155,24 +268,23 @@ class FusedActor
     end
     return groups
   end
+
+  def equals(other)
+    if(self.name == other.name &&
+        self.birthday == other.birthday &&
+        self.gender == other.gender &&
+        self.place_of_birth == other.place_of_birth &&
+        self.nationality == other.nationality &&
+        self.known_credits == other.known_credits &&
+        self.adult_actor == other.adult_actor &&
+        self.years_active == other.years_active &&
+        self.alias == other.alias &&
+        self.biography == other.biography &&
+        self.known_for == other.known_for &&
+        self.acting == other.acting)
+      return true
+    else
+      return false
+    end
+  end
 end
-
-#a1 = FusedActor.where(name: "Scarlett Johansson").first
-#a2 = FusedActor.first
-#a3 = FusedActor.where(name: "Scarlett Johansson").first
-#a3.name = "George Bush"
-
-
-
-#a3.gender = nil
-#a3.birthday = nil
-
-#puts a1.match?(a2)
-#puts a1.match?(a3)
-
-# ids = ImdbQuery.query_actordb_by_year 1980
-# p ids
-# as = FusedActor.read_imdb_by_ids ids
-# as.each do |a|
-#   puts a.name
-# end

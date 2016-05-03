@@ -50,12 +50,13 @@ class PortalPreparation
           rb <=> ra
         end
       end
-      return popular_movies
     end
 
     popular_movies.reject! do |movie|
       movie.rating.nil? || movie.rating == 10.0
     end
+
+    return popular_movies
 
     popular_movies[0, limits].each do |movie|
       puts "#{movie.title}: #{movie.rating} | year: #{movie.year}, genre: #{movie.genre.inspect}"

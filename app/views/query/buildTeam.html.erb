@@ -1,7 +1,14 @@
 <h1>Query Build a TEAM</h1>
-<p>Find me in app/views/query/buildTeam.html.erb</p>
-<%= "build team for " + @genre %>
-<br />
-<%= @team %>
-<br />
-<%= "--Finish--" %>
+<%= content_tag :h2, "Build a team for #{@genre}" %>
+<% @team.each_pair do |k, v| %>
+    <% unless k == 'Actors' %>
+        <p><strong><%= "#{k}: " %></strong><br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= v %></p>
+    <% else %>
+        <p><strong><%= "#{k}: " %></strong><br />
+          <% v.each do |a| %>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= a %><br />
+          <% end %>
+        </p>
+    <% end %>
+<% end %>

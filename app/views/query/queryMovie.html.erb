@@ -1,36 +1,133 @@
 <h1>Query Movie</h1>
-<p>Find me in app/views/query/queryMovie.html.erb</p>
-<%= "Search " + @moviename %>
+<%= "Search: " + @moviename %>
 <br />
-<% @movie.each { %>
-<% |item| %>
-<h4 itemprop="name" class>
-	<%=	"Title: " + item.title %>
-	<br />
-</h4>
-<p>
-	<%= item.inspect %>
-	<br />
-	<%=	"Rating: #{item.rating}" %>
-	<br />
-	<%= "Release Year: #{item.year}" %>
-	<br />
-	<%= "Directors: #{item.directors}"%>
-	<br />
-	<%= "Writers: #{item.writers}"%>
-	<br />
-	<%= "Cast List:(Actor:Role)"%>
-	<%= "#{item.casts}"%>
-	<br />
-	<%= "Total Time: #{item.total_time}"%>
-	<br />
-	<%= "Language: #{item.writers}"%>
-	<br />
-	<%= "Country: #{item.country}"%>
-	<br />
-	<%= "Genre: #{item.genre}"%>
-	<br />
-	<%= "source: #{item.db_name}" %>
-</p>
-<br />
-<%	} %>
+<% @movie.each do |item| %><%
+  year = item.year.nil? ? '-' : item.year.to_s
+  rating = item.rating.round(2) if item.rating!= nil
+  total_time = item.total_time.nil? ? '-' : item.total_time
+  if item.directors != nil && item.directors != []
+    directors = ''
+    item.directors.each do |director|
+      directors += "#{director}, "
+    end
+    directors.chomp!(', ')
+  else
+    directors = '-'
+  end
+  if item.main_casts != nil && item.main_casts != []
+    main_casts = ''
+    item.main_casts.each do |cast|
+      main_casts += "#{cast}, "
+    end
+    main_casts.chomp!(', ')
+  else
+    main_casts = '-'
+  end
+  if item.languages != nil && item.languages != []
+    languages = ''
+    item.languages.each do |lang|
+      languages += "#{lang}, "
+    end
+    languages.chomp!(', ')
+  else
+    languages = '-'
+  end
+  if item.alias != nil && item.alias != []
+    alias_name = ''
+    item.alias.each do |name|
+      alias_name += "#{name}, "
+    end
+    alias_name.chomp!(', ')
+  else
+    alias_name = '-'
+  end
+  if item.country != nil && item.country != []
+    country = ''
+    item.country.each do |c|
+      country += "#{c}, "
+    end
+    country.chomp!(', ')
+    else
+    country = '-'
+  end
+  if item.genre != nil && item.genre != []
+    genre = ''
+    item.genre.each do |g|
+      genre += "#{g}, "
+    end
+    genre.chomp!(', ')
+  else
+    genre = '-'
+  end
+  if item.writers != nil && item.writers != []
+    writers = ''
+    item.writers.each do |writer|
+      writers += "#{writer}, "
+    end
+    writers.chomp!(', ')
+  else
+    writers = '-'
+  end
+  if item.filming_locations != nil && item.filming_locations != []
+    filming_locations = ''
+    item.filming_locations.each do |fl|
+      filming_locations += "#{fl}, "
+    end
+    filming_locations.chomp!(', ')
+  else
+    filming_locations = '-'
+  end
+  if item.keywords != nil && item.keywords != []
+    keywords = ''
+    item.keywords.each do |keyword|
+      keywords += "#{keyword}, "
+    end
+    keywords.chomp!(', ')
+  else
+    keywords = '-'
+  end
+  if item.db_name != nil && item.db_name != ''
+    db_imgs = []
+    db_imgs << 'imdb_logo.png' if item.db_name =~ /imdb/
+    db_imgs << 'tmdb_logo.jpg' if item.db_name =~ /tmdb/
+    db_imgs << 'wiki_logo.jpg' if item.db_name =~ /wiki/
+  else
+    db_imgs = []
+  end
+%>
+    <hr />
+    <div id="name" >
+      <h3>
+        <strong>Title: </strong><%=	item.title %>
+      </h3>
+    </div>
+    <div id="mainCol">
+      <p><strong>Year: </strong><%= year %></p>
+      <p><strong>Rating: </strong><%= rating %></p>
+      <p><strong>Total Time: </strong><%= total_time %></p>
+      <p><strong>Directors: </strong><%= directors %></p>
+      <p><strong>Main Casts: </strong><%= main_casts %></p>
+      <p><strong>Casts: </strong><br />
+        <% item.casts.each_pair do |cast, actor| %>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= actor %>
+            <%= (content_tag :i, '--- acted by ') + cast %>
+            <br />
+        <% end %>
+            </p>
+      <p><strong>Languages: </strong><%= languages %></p>
+      <p><strong>Alias: </strong><%= alias_name %></p>
+      <p><strong>Country: </strong><%= country %></p>
+      <p><strong>Genre: </strong><%= genre %></p>
+      <p><strong>Writers: </strong><%= writers %></p>
+      <p><strong>Filming_locations: </strong><%= filming_locations %></p>
+      <p><strong>Keywords: </strong><%= keywords %></p>
+    </div>
+    <div id="db_source">
+      <p><strong>Data Sources: </strong>
+        <% db_imgs.each do |img| %>
+            <%= image_tag img, width: "40" %>
+        <% end %>
+      </p>
+    </div>
+    <br />
+<% end %>

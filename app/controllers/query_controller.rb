@@ -1,68 +1,75 @@
-require_relative '../models/build_team'
+# require_relative '../models/build_team'
 require_relative '../models/portal_preparation'
+require 'json'
+
 class QueryController < ApplicationController
   def buildTeam
+    team_builder = BuildTeam.new
   	@genre = params[:genre]
-  	@team = Team.build_team(@genre)
+  	@team = team_builder.build_team(@genre)
   end
   def queryActor
   	@actorname = params[:actorname]
-  	@actor = FusedActor.where(name: @actorname)
+    actorname_re = Regexp.new(@actorname, true)
+  	@actor = FusedActor.where(name: actorname_re)
   end
   def queryMovie
   	@moviename = params[:moviename]
-  	@movie = FusedMovie.where(title: @moviename)
+    moviename_re = Regexp.new(@moviename, true)
+  	@movie = FusedMovie.where(title: moviename_re)
   end
   def opendb
   end
   def originalMovie
     @source = params[:source]
     @name = params[:name]
+    name_re = Regexp.new("^#{@name}$", true)
     #@movie = Array.new
-    if (@source == 'imdb')
-      @movie = ImdbMovie.where(title: @name)
+    if (@source.downcase == 'imdb')
+      @movie = ImdbMovie.where(title: name_re)
     end
-    if (@source == 'tmdb')
-      @movie = TmdbMovie.where(title: @name)
+    if (@source.downcase == 'tmdb')
+      @movie = TmdbMovie.where(title: name_re)
     end
-    if (@source == 'wiki') 
-      @movie = WikiFilm.where(title: @name)
+    if (@source.downcase == 'wiki')
+      @movie = WikiFilm.where(title: name_re)
     end
-    if (@source == 'all')
-      @wiki = WikiFilm.where(title: @name)
+    if (@source.downcase == 'all')
+      @wiki = WikiFilm.where(title: name_re)
       #@movie.push(@wiki.flatten!)
-      @imdb = ImdbMovie.where(title: @name)
+      @imdb = ImdbMovie.where(title: name_re)
       #@movie.push(@imdb.flatten!)
-      @tmdb = TmdbMovie.where(title: @name)
+      @tmdb = TmdbMovie.where(title: name_re)
       #@movie.push(@tmdb.flatten!)
     end
   end
   def originalActor
     @source = params[:source]
     @name = params[:name]
+    name_re = Regexp.new("#{@name}", true)
     #@actor = Array.new
     if (@source == 'imdb') 
-      @actor = ImdbActor.where(name: @name)
+      @imdb = ImdbActor.where(name: name_re)
     end
     if (@source == 'tmdb') 
-      @actor = TmdbActor.where(name: @name)
+      @tmdb = TmdbActor.where(name: name_re)
     end
-    if (@source == 'wiki') 
-      @actor = WikiActor.where(name: @name)
+    if (@source == 'wiki')
+      @wiki = WikiActor.where(name: name_re)
     end
     if (@source == 'all')
-      @wiki = WikiActor.where(name: @name)
+      @wiki = WikiActor.where(name: name_re)
       #@movie.push(@wiki.flatten!)
-      @imdb = ImdbActor.where(name: @name)
+      @imdb = ImdbActor.where(name: name_re)
       #@movie.push(@imdb.flatten!)
-      @tmdb = TmdbActor.where(name: @name)
+      @tmdb = TmdbActor.where(name: name_re)
       #@movie.push(@tmdb.flatten!)
     end
   end
   def popularfind
     @year = params[:year]
     @genre = params[:genre]
-    @movies = PortalPreparation.popular_movie(genre: 'all', year: 'all', limits: 5)
+    @movies = PortalPreparation.popular_movie(genre: @genre, year: @year, limits: 10)
   end
 
 end

@@ -1,35 +1,72 @@
-<h1>Query Actor</h1>
-<p>Find me in app/views/query/queryActor.html.erb</p>
-<%= "Search " + @actorname %>
+<h2>Query Actor</h2>
+<%= "Search: " + @actorname %>
 <br />
-<% @actor.each { %>
-<% |item| %>
-<h4 itemprop="name" class>
-	<%=	"Name: " + item.name %>
-	<br />
-</h4>
-<p>
-	<%= item.inspect %>
-	<br />
-	<%=	"Birthday: " + item.birthday.to_s %>
-	<br />
-	<%= "Gender" + item.gender %>
-	<br />
-	<%= "Place of birth: " + item.place_of_birth %>
-	<br />
-	<%= "Biography: " + item.biography %>
-	<br />
-	<%= "Known For: #{item.known_for}" %>
-	<br />
-	<%= "Known Credits: #{item.known_credits}" %>
-	<br />
-	<%= "Adult Actor: #{item.adult_actor}" %>
-	<br />
-	<%= "Alias: #{item.alias}" %>
-	<br />
-	<%= "Years of Active: #{item.years_active}" %>
-	<br />
-	<%= "data source: #{item.db_name}" %>
-</p>
+<% @actor.each do |item| %><%
+  birthday = item.birthday.nil? ? '-' : item.birthday.to_s
+  gender = item.gender == 'M' ? 'Male' :
+      'F' ? 'Female' : '-'
+  place_of_birth = (item.place_of_birth.nil? || item.place_of_birth == '') ? '-' : item.place_of_birth
+  biography = (item.biography.nil? || item.biography == '') ? '-' : item.biography
+  known_credits = item.known_credits.nil? ? '-' : item.known_credits
+  adult_actor = item.adult_actor.nil? ? '-' : item.adult_actor
+  years_active = (item.years_active.nil? || item.years_active == '') ? '-' : item.years_active
+  if item.known_for != nil && item.known_for != []
+    known_for = ''
+    item.known_for.each do |movie|
+      known_for += "#{movie}, "
+    end
+    known_for.chomp!(', ')
+  else
+    known_for = '-'
+  end
+  if item.alias != nil && item.alias != []
+    alias_name = ''
+    item.alias.each do |name|
+      alias_name += "#{name}, "
+    end
+    alias_name.chomp!(', ')
+  else
+    alias_name = '-'
+  end
+  if item.db_name != nil && item.db_name != ''
+    db_imgs = []
+    db_imgs << 'imdb_logo.png' if item.db_name =~ /imdb/
+    db_imgs << 'tmdb_logo.jpg' if item.db_name =~ /tmdb/
+    db_imgs << 'wiki_logo.jpg' if item.db_name =~ /wiki/
+  else
+    db_imgs = []
+  end
+%>
+    <hr />
+    <div id="name" >
+      <h3>
+        <strong>Name: </strong><%=	item.name %>
+      </h3>
+    </div>
+    <div id="mainCol">
+      <p><strong>Birthday: </strong><%= birthday %></p>
+      <p><strong>Gender: </strong><%= gender %></p>
+      <p><strong>Place of Birth: </strong><%= place_of_birth %></p>
+      <p><strong>Biography: </strong><%= biography %></p>
+      <p><strong>Known For: </strong><%= known_for %></p>
+      <p><strong>Known Credits: </strong><%= known_credits %></p>
+      <p><strong>Adult Actor: </strong><%= adult_actor %></p>
+      <p><strong>Alias: </strong><%= alias_name %></p>
+      <p><strong>Years of Active: </strong><%= years_active %></p>
+      <p><strong>Acting: </strong><br />
+        <% item.acting.each do |act| %>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= act[:movie] %>
+            <%= (content_tag :i, '--- acting as ') + act[:cast] %>
+            <br />
+        <% end %>
+      </p>
+    </div>
+    <div id="db_source">
+      <p><strong>Data Sources: </strong>
+        <% db_imgs.each do |img| %>
+            <%= image_tag img, width: "40" %>
+        <% end %>
+      </p>
+    </div>
 <br />
-<%	} %>
+<% end %>

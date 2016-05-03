@@ -13,7 +13,7 @@ class ImdbActor	#name of collection: imdb_actor
 	#store_in database: 'movieactor'
 	store_in database: 'original'
 	field :name, type: String
-	field :birthday, type: Date
+	field :birthday, type: String
 	field :jobs, type: Array
 	field :gender, type: String
 	field :place_of_birth, type: String

@@ -1,43 +1,134 @@
 <h1>Query Original Actor</h1>
-<p>Find me in app/views/query/originalActor.html.erb</p>
 <h4>
 <%= "Search " + @name + " in " + @source %>
 </h4>
 <br />
+
+
 <p>
-	<% if (@source == 'all') %>
-	<%	if (!@imdb.nil?) %>
-	<h5>
-	<%		"In IMDB" %>
-	<%		@imdb.each { %>
-	<%		|item| %>
-	<%=		item.inspect %>
-	<% } %>
+	<%	if (!@imdb.nil? && @imdb != []) %>
+     <%= content_tag :h2, (content_tag :strong, 'From imdb.com') %>
+
+        <% @imdb.each do |item| %><%
+  birthday = item.birthday.nil? ? '-' : item.birthday
+  gender = item.gender == 'M' ? 'Male' :
+      'F' ? 'Female' : '-'
+  place_of_birth = (item.place_of_birth.nil? || item.place_of_birth == '') ? '-' : item.place_of_birth
+  description = (item.description.nil? || item.description == '') ? '-' : item.description
+  url = (item.url.nil? || item.url == '') ? '-' : item.url
+  nationality = (item.nationality.nil? || item.nationality == '') ? '-' : item.nationality
+  if item.known_for != nil && item.known_for != []
+    known_for = ''
+    item.known_for.each do |movie|
+      known_for += "#{movie}, "
+    end
+    known_for.chomp!(', ')
+  else
+    known_for = '-'
+  end
+  if item.jobs != nil && item.jobs != []
+    jobs = ''
+    item.jobs.each do |job|
+      jobs += "#{job}, "
+    end
+    jobs.chomp!(', ')
+  else
+    jobs = '-'
+  end
+%>
+            <hr />
+            <div id="name" >
+              <h3>
+                <strong>Name: </strong><%=	item.name %>
+              </h3>
+            </div>
+            <div id="mainCol">
+              <p><strong>Birthday: </strong><%= birthday %></p>
+              <p><strong>Gender: </strong><%= gender %></p>
+              <p><strong>Place of Birth: </strong><%= place_of_birth %></p>
+              <p><strong>Nationality: </strong><%= nationality %></p>
+              <p><strong>Description: </strong><%= description %></p>
+              <p><strong>Known For: </strong><%= known_for %></p>
+              <p><strong>Jobs: </strong><%= jobs %></p>
+              <p><strong>url: </strong><%= url %></p>
+            </div>
+            <br />
+        <% end %>
 	<% end %>
-	</h5>
-	<%	if (!@tmdb.nil?) %>
-	<h5>
-	<%		"In TMDB" %>
-	<%		@tmdb.each { %>
-	<%		|item| %>
-	<%=		item.inspect %>
-	<% } %>
+
+	<%	if (!@tmdb.nil? && @tmdb != []) %>
+    <%= content_tag :h2, (content_tag :strong, 'From Themoviedb.org') %>
+        <hr />
+        <% @tmdb.each do |item| %><%
+  birthday = item.birthday.nil? ? '-' : item.birthday.to_s
+  day_of_death = item.day_of_death.nil? ? '-' : item.day_of_death.to_s
+  gender = item.gender == 'M' ? 'Male' :
+      'F' ? 'Female' : '-'
+  place_of_birth = (item.place_of_birth.nil? || item.place_of_birth == '') ? '-' : item.place_of_birth
+  biography = (item.biography.nil? || item.biography == '') ? '-' : item.biography
+  known_credits = item.known_credits.nil? ? '-' : item.known_credits
+  adult_actor = item.adult_actor.nil? ? '-' : item.adult_actor
+  if item.known_for != nil && item.known_for != []
+    known_for = ''
+    item.known_for.each do |movie|
+      known_for += "#{movie}, "
+    end
+    known_for.chomp!(', ')
+  else
+    known_for = '-'
+  end
+  if item.alias != nil && item.alias != []
+    alias_name = ''
+    item.alias.each do |name|
+      alias_name += "#{name}, "
+    end
+    alias_name.chomp!(', ')
+  else
+    alias_name = '-'
+  end
+%>
+            <div id="name" >
+              <h3>
+                <strong>Name: </strong><%=	item.name %>
+              </h3>
+            </div>
+            <div id="mainCol">
+              <p><strong>Birthday: </strong><%= birthday %></p>
+              <p><strong>Day of Death: </strong><%= day_of_death %></p>
+              <p><strong>Gender: </strong><%= gender %></p>
+              <p><strong>Place of Birth: </strong><%= place_of_birth %></p>
+              <p><strong>Biography: </strong><%= biography %></p>
+              <p><strong>Known For: </strong><%= known_for %></p>
+              <p><strong>Known Credits: </strong><%= known_credits %></p>
+              <p><strong>Adult Actor: </strong><%= adult_actor %></p>
+              <p><strong>Alias: </strong><%= alias_name %></p>
+            </div>
+            <br />
+        <% end %>
 	<% end %>
-	</h5>
-	<%	if (!@wiki.nil?) %>
-	<h5>
-	<%		"In WIKI" %>
-	<%		@wiki.each { %>
-	<%		|item| %>
-	<%=		item.inspect %>
-	<% } %>
+
+
+	<% if (!@wiki.nil? && @wiki != []) %>
+        <%= content_tag :h2, (content_tag :strong, 'From Wikipedia.org') %>
+        <hr />
+	<% @wiki.each do |item| %>
+        <div id="name" >
+          <h3>
+            <strong>Name: </strong><%=	item.name %>
+          </h3>
+        </div>
+            <p><strong>Birthday: </strong><%= item.birthday %></p>
+            <p><strong>Gender: </strong><%= item.gender %></p>
+            <p><strong>Place of Birth: </strong><%= item.place_of_birth %></p>
+            <p><strong>Known For: </strong><%= item.known_for %></p>
+            <p><strong>Alias: </strong><%= item.alias %></p>
+            <p><strong>Years Active: </strong><%= item.years_active %></p>
+            <p><strong>Education: </strong><%= item.education %></p>
+            <p><strong>Nationality: </strong><%= item.nationality %></p>
+            <p><strong>Partner: </strong><%= item.partner %></p>
+            <p><strong>Spouse: </strong><%= item.spouse %></p>
+            <p><strong>Children: </strong><%= item.children %></p>
 	<% end %>
-	</h5>
-	<% end %>
-	<% if (!@actor.nil?) %>
-<% @actor.each { %>
-<% |item| %>
-<%= item.inspect %>
-<% } %>
+
 <% end %>
-</p>
+
